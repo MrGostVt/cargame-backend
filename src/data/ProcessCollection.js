@@ -6,7 +6,8 @@ const collectionController = {
         const room = {
             users: [{
                 userID,
-                userVehicleInfo,
+                userSocketID,
+                userVehicleInfo: null,
             }],
             identifier: roomID,
         };
@@ -18,19 +19,21 @@ const collectionController = {
         for(let room of Collection){
             if(roomID === room.identifier){
                 room.users.push({userID, userVehicleInfo});
-                return true;
+                return room;
             }
         }
-        return false;
+        return null;
     },
     async DeleteRoom(){
 
     },
-    async UpdateRoomInfo(roomID, userID, info){
+    //info=[{key: 'key', value:'value'}]
+    async UpdateRoomInfo(roomID, userID, ...info){
         for(let room of Collection){
             if(roomID === room.identifier){
-                
-                room.users[userID].userVehicleInfo = info;
+                for (const prop of info) {
+                    room.users[userID][prop.key] = prop.value;
+                }
                 return true;
             }
         }
@@ -43,6 +46,13 @@ const collectionController = {
             }
         }
         return null;
+    },
+    async GetAllRooms(){
+        return Collection;
+    },
+    async SetSocketID(roomID, userID, socketID){
+        const result = await this.UpdateRoomInfo(roomID, userID, {key: 'userSocketID', value: socketID})
+        return result;
     },
 }
 

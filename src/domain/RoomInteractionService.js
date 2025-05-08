@@ -1,24 +1,43 @@
 import collectionController from "../data/ProcessCollection";
 
 const roomInteractionService = {
-    GenerateUserID(){
+    async GenerateUserID(){
         const userID = 100 + Math.random() * 899;
 
         return userID;
     },
-    CreateRoom(userID, userVehicleInfo){
+    async CreateRoom(userID, userVehicleInfo){
         const roomID = 1000 + Math.random() * 8999;
-        collectionController.CreateRoom(roomID, userID, userVehicleInfo);
+        await collectionController.CreateRoom(roomID, userID, userVehicleInfo);
 
         return roomID;
     },
-    JoinRoom(roomID, userID, userVehicleInfo){
-        const result = collectionController.JoinRoom(roomID, userID, userVehicleInfo);
+    async JoinRoom(roomID, userID, userVehicleInfo){
+        const result = await collectionController.JoinRoom(roomID, userID, userVehicleInfo);
+        if(!result){
+            return null;
+        }
+
         return result;
     },
-    UpdateRoomInfo(roomID, userID, userVehicleInfo){
-        collectionController.UpdateRoomInfo(roomID, userID, userVehicleInfo);
+    async UpdateRoomInfo(roomID, userID, userVehicleInfo){
+        await collectionController.UpdateRoomInfo(roomID, userID, userVehicleInfo);
+    },
+    async GetAllRooms(){
+        const collection = await collectionController.GetAllRooms();
+        const roomsPrev = [];
+        
+        for(let room of collection){
+            const roomPrev = {
+                usersCount: room.users.length,
+                identifier: room.identifier,
+            }
+
+            roomsPrev.push(roomPrev);
+        }
+
+        return roomsPrev;
     },
 }
 
-export default roomInteractionService
+export default roomInteractionService;
