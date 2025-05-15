@@ -1,6 +1,6 @@
-import gameSocket from "./Game";
+import gameSocket from "./Game.js";
 
-export default socket = async (io) => {
+const socket = async (io) => {
     io.on("connection", async (socket) => {
         console.log(socket.id);
 
@@ -11,3 +11,5 @@ export default socket = async (io) => {
         });
     })
 }
+
+export default socket;

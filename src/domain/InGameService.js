@@ -1,13 +1,22 @@
-import collectionController from "../data/ProcessCollection";
+import collectionController from "../data/ProcessCollection.js";
 
 const inGameService = {
     async MoveTo(roomID, userID, vehicleInfo){
-        const result = await collectionController.UpdateRoomInfo(roomID, userID, vehicleInfo);
+        
+        const result = await collectionController.UpdateRoomInfo(roomID, userID, 
+            {key: 'left', value: vehicleInfo.left}, 
+            {key: 'top', value: vehicleInfo.top},
+            {key: 'rotateAngle', value: vehicleInfo.rotateAngle},
+            {key: 'wheelRotateAngle', value: vehicleInfo.wheelRotateAngle});
         return result;
     },
     async GetRoomCarsExcUser(roomID, userID){
-        const room = await collectionController.GetRoomInfo(roomID);
+        const room = await collectionController.GetRoomInfo(+roomID);
+        console.log(roomID);
         const users = [];
+        if(room === null){
+            return users;
+        }
 
         room.users.forEach((val) => {
             if(val.userID === userID){
@@ -25,7 +34,7 @@ const inGameService = {
         return result;
     },
     async GetAllUsers(roomID){
-        const room = collectionController.GetRoomInfo(roomID);
+        const room = await collectionController.GetRoomInfo(roomID);
 
         const users = [];
         room.users.forEach((val) => {

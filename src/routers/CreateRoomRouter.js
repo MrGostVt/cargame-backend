@@ -1,15 +1,16 @@
 import Express, { response } from 'express'
 import { Router } from 'express'
-import roomInteractionService from '../domain/RoomInteractionService';
-import { generateResponce, HTTP_CODES } from '../utils/ResponceUtils';
-import utilService from '../domain/UtilService';
+import roomInteractionService from '../domain/RoomInteractionService.js';
+import { generateResponce, HTTP_CODES } from '../utils/ResponceUtils.js';
+import utilService from '../domain/UtilService.js';
 
 const createRoomRouter = Router();
 
-createRoomRouter.post('/create-room', async (req, res) => {
+createRoomRouter.post('/', async (req, res) => {
     const userID = +req.body.userID;
     const vehicleInfo = {
         vehicleID: req.body.vehicle.id,
+        color: req.body.vehicle.color,
         left: req.body.vehicle.left,
         top: req.body.vehicle.top,
         rotateAngle: +req.body.vehicle.angle,
@@ -19,19 +20,20 @@ createRoomRouter.post('/create-room', async (req, res) => {
     let isRequestOk = !!userID;
 
     if(isRequestOk){
-        isRequestOk = await utilService.checkBody(vehicleInfo, [])
+        const answer = await utilService.checkBody(vehicleInfo, []);
+        isRequestOk = !answer.isHasProblems;
     }
 
     if(!isRequestOk){
-        response.status(HTTP_CODES.BAD_REQUEST_400);
-        response.json(generateResponce('400, Bad request'));
+        res.status(HTTP_CODES.BAD_REQUEST_400);
+        res.json(generateResponce('400, Bad request'));
         return;
     }
 
-    const room = roomInteractionService.CreateRoom(userID, vehicleInfo);
+    const room = await roomInteractionService.CreateRoom(userID, vehicleInfo);
 
-    response.status(HTTP_CODES.OK_200);
-    response.json(generateResponce('200, Ok', {roomID: room}));
+    res.status(HTTP_CODES.OK_200);
+    res.json(generateResponce('200, Ok', {roomID: room}));
 });
 
 export default createRoomRouter;

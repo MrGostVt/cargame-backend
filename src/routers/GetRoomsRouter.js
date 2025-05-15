@@ -3,13 +3,13 @@ import { Router } from 'express'
 import roomInteractionService from '../domain/RoomInteractionService.js';
 import { generateResponce, HTTP_CODES } from '../utils/ResponceUtils.js';
 
-const userIDRouter = Router();
+const getRoomsRouter = Router();
 
-userIDRouter.get('/', async (req, res) => {
-    const userID = await roomInteractionService.GenerateUserID();
+getRoomsRouter.get('/', async (req, res) => {
+    const rooms = await roomInteractionService.GetAllRooms();
 
     res.status(HTTP_CODES.OK_200);
-    res.json(generateResponce('200, Ok', {userID}))
+    res.json(generateResponce('200, Ok', rooms))
 });
 
-export default userIDRouter;
+export default getRoomsRouter;

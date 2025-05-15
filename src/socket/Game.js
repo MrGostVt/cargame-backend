@@ -1,27 +1,41 @@
-import utilService from "../domain/UtilService";
-import inGameService from "../domain/InGameService";
+import utilService from "../domain/UtilService.js";
+import inGameService from "../domain/InGameService.js";
 
+//TODO: UPDATE OBJECTS TO JSON,
+//socket.to - отправляет всем кроме текущего, в комнате, io.to - туда куда скажете.
 const gameSocket = (socket, io) => {
     socket.on("join-room", async (roomID, userID) => {
         await socket.join(roomID);
-        await inGameService.AddSocketId(roomID, userID, socket.id);
-        const users = await inGameService.GetRoomCarsExcUser(roomID, userID);
-        await socket.to(roomID).emit("player-joined", socket.id, {users});
+        const isAdded = await inGameService.AddSocketId(+roomID, +userID, socket.id);
+        if(!isAdded){
+            io.to(socket.id).emit("bad-request");
+            return;
+        }
+
+        const users = await inGameService.GetAllUsers(+roomID);
+        for(let user of users){
+            const cars = await inGameService.GetRoomCarsExcUser(+roomID, user.userID);
+            io.to(user.userSocketID).emit("player-joined", { users: cars });
+            console.log(`Player ID: ${user.userID}/${user.userSocketID}, received`);
+        }   
     });
     socket.on("move", async (roomID, userID, vehicleInfo) => {
-        const isBodyOk = await utilService.checkBody(vehicleInfo, ['left', 'top', 'vehicleID', 
+        const answer = await utilService.checkBody(vehicleInfo, ['left', 'top', 
             'rotateAngle', 'wheelRotateAngle']);
+        const isBodyOk = !answer.isHasProblems && !!+roomID && !!+userID;
+        console.log(roomID, userID, `roomID, userID`);
         
         if(!isBodyOk){
-            await socket.to(roomID).emit("wrong-body", socket.id);
+            await io.to(socket.id).emit("wrong-body");
+            return;
         }
         else{
-            const result = await inGameService.MoveTo(roomID, userID, vehicleInfo);            
-            const users = await inGameService.GetAllUsers(roomID);
+            const result = await inGameService.MoveTo(+roomID, +userID, vehicleInfo);            
+            const users = await inGameService.GetAllUsers(+roomID);
             if(result){
                 for(let user of users){
-                    const cars = await inGameService.GetRoomCarsExcUser(roomID, user.userID);
-                    socket.to(roomID).emit("update-positions", user.userSocketID, {users: cars});
+                    const cars = await inGameService.GetRoomCarsExcUser(+roomID, user.userID);
+                    io.to(user.userSocketID).emit("update-positions", { users: cars });
                 }
             }
         }

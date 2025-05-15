@@ -1,5 +1,5 @@
-import server from "./app";
-import Environment from "./environment/Environment";
+import Environment from "./environment/Environment.js";
+import server from "./app.js";
 
 
 const port = Environment.port;

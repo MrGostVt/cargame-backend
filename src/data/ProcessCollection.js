@@ -1,38 +1,56 @@
 
-const Collection = [];
+const Collection = [{users:[{userID: 964, userSocketID: null, userVehicleInfo: {}}], identifier:8960}];
 
 const collectionController = {
     async CreateRoom(roomID, userID, userVehicleInfo){
         const room = {
             users: [{
                 userID,
-                userSocketID,
-                userVehicleInfo: null,
+                userSocketID: null,
+                userVehicleInfo,
             }],
             identifier: roomID,
         };
 
         Collection.push(room);
-        return true;
+        return room;
     },
     async JoinRoom(roomID, userID, userVehicleInfo){
+        let roomExcUser = null;
         for(let room of Collection){
             if(roomID === room.identifier){
-                room.users.push({userID, userVehicleInfo});
-                return room;
+                roomExcUser = {...room};
+                roomExcUser.users = [...room.users];//TODO: UPDATE copying, to make it more safety
+                room.users.push({userID, userVehicleInfo, userSocketID: null});
             }
         }
-        return null;
+        return roomExcUser;
     },
     async DeleteRoom(){
 
     },
     //info=[{key: 'key', value:'value'}]
+    async getUserIndex(roomID, userID){
+        for(let room of Collection){
+            if(roomID === room.identifier){
+                for (const index in room.users) {
+                    if(room.users[index].userID === userID){
+                        return index;
+                    };
+                }
+            }
+        }
+        return null;
+    },
     async UpdateRoomInfo(roomID, userID, ...info){
+        const userIndex = await this.getUserIndex(roomID,userID);
+        if(userIndex === null){
+            return false;
+        }
         for(let room of Collection){
             if(roomID === room.identifier){
                 for (const prop of info) {
-                    room.users[userID][prop.key] = prop.value;
+                    room.users[userIndex][prop.key] = prop.value;
                 }
                 return true;
             }
