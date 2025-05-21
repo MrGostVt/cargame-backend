@@ -10,23 +10,27 @@ const joinRoomRouter = Router();
 joinRoomRouter.post('/', async (req, res) => {
     const roomID = +req.body.roomID;
     const userID = +req.body.userID;
-    const vehicleInfo = {
-        vehicleID: req.body.vehicle.id,
-        color: req.body.vehicle.color,
-        left: req.body.vehicle.left,
-        top: req.body.vehicle.top,
-        rotateAngle: +req.body.vehicle.angle,
-        wheelRotateAngle: +req.body.vehicle.wheelAngle,
-    };
-
-    let isRequestOk = !!userID && !!roomID;
+    let vehicleInfo;
+    let isRequestOk = !!userID || !!roomID;
+    try{
+        vehicleInfo = {
+            vehicleID: req.body.vehicle.id,
+            color: req.body.vehicle.color,
+            left: req.body.vehicle.left,
+            top: req.body.vehicle.top,
+            rotateAngle: +req.body.vehicle.angle,
+            wheelRotateAngle: +req.body.vehicle.wheelAngle,
+        };
+    }catch{
+        isRequestOk = false;
+    }
 
     if(isRequestOk){
         const answer = await utilService.checkBody(vehicleInfo, []);
         isRequestOk = !answer.isHasProblems;
     }
 
-    const room = await roomInteractionService.JoinRoom(roomID, userID, vehicleInfo);
+    const room = isRequestOk? await roomInteractionService.JoinRoom(roomID, userID, vehicleInfo): false;
 
     if(!isRequestOk || !room){
         res.status(HTTP_CODES.BAD_REQUEST_400);

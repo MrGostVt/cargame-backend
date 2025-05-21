@@ -13,7 +13,9 @@ const collectionController = {
         };
 
         Collection.push(room);
-        return room;
+        const roomClone = {...room};
+        roomClone.users = [...room.users];
+        return roomClone;
     },
     async JoinRoom(roomID, userID, userVehicleInfo){
         let roomExcUser = null;
@@ -42,25 +44,29 @@ const collectionController = {
         }
         return null;
     },
-    async UpdateRoomInfo(roomID, userID, ...info){
+    async UpdateRoomInfo(roomID, userID, isVehicleInfo, ...info){
+        const room = await this.GetRoomInfo(roomID);
+        // console.log("room")
+        // console.log(room)
         const userIndex = await this.getUserIndex(roomID,userID);
-        if(userIndex === null){
+        if(userIndex === null || room === null){
             return false;
         }
-        for(let room of Collection){
-            if(roomID === room.identifier){
-                for (const prop of info) {
-                    room.users[userIndex][prop.key] = prop.value;
-                }
-                return true;
+        for (const prop of info) {
+            if(isVehicleInfo){
+                room.users[userIndex]["userVehicleInfo"][prop.key] = prop.value;
+                continue;
             }
+            room.users[userIndex][prop.key] = prop.value;
+            console.log(`userIndex: ${userIndex}, userID: ${userID}, prop: ${prop.key}, propVal: ${prop.value}`)
+            console.log(room.users[userIndex][prop.key])
         }
-        return false;
+        return true;
     },
     async GetRoomInfo(roomID){
         for(let room of Collection){
             if(roomID === room.identifier){
-                return room;
+                return {...room};
             }
         }
         return null;
@@ -69,7 +75,7 @@ const collectionController = {
         return Collection;
     },
     async SetSocketID(roomID, userID, socketID){
-        const result = await this.UpdateRoomInfo(roomID, userID, {key: 'userSocketID', value: socketID})
+        const result = await this.UpdateRoomInfo(roomID, userID, false, {key: 'userSocketID', value: socketID})
         return result;
     },
 }

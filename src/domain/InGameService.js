@@ -3,11 +3,11 @@ import collectionController from "../data/ProcessCollection.js";
 const inGameService = {
     async MoveTo(roomID, userID, vehicleInfo){
         
-        const result = await collectionController.UpdateRoomInfo(roomID, userID, 
+        const result = await collectionController.UpdateRoomInfo(roomID, userID, true, 
             {key: 'left', value: vehicleInfo.left}, 
             {key: 'top', value: vehicleInfo.top},
-            {key: 'rotateAngle', value: vehicleInfo.rotateAngle},
-            {key: 'wheelRotateAngle', value: vehicleInfo.wheelRotateAngle});
+            {key: 'rotateAngle', value: vehicleInfo.angle},
+            {key: 'wheelRotateAngle', value: vehicleInfo.wheelAngle});
         return result;
     },
     async GetRoomCarsExcUser(roomID, userID){
@@ -41,6 +41,9 @@ const inGameService = {
             users.push({userID: val.userID, userSocketID: val.userSocketID});
         });
         return users;
+    },
+    async RemovePlayerFromRoom(){
+
     }
 };
 

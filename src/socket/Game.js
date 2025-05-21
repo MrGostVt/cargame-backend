@@ -5,12 +5,16 @@ import inGameService from "../domain/InGameService.js";
 //socket.to - отправляет всем кроме текущего, в комнате, io.to - туда куда скажете.
 const gameSocket = (socket, io) => {
     socket.on("join-room", async (roomID, userID) => {
+        console.log("JoinRoom st1")
         await socket.join(roomID);
+        console.log("JoinRoom st2")
+        console.log(+roomID, +userID);
         const isAdded = await inGameService.AddSocketId(+roomID, +userID, socket.id);
         if(!isAdded){
             io.to(socket.id).emit("bad-request");
             return;
         }
+        console.log("JoinRoom st3");
 
         const users = await inGameService.GetAllUsers(+roomID);
         for(let user of users){
@@ -18,12 +22,13 @@ const gameSocket = (socket, io) => {
             io.to(user.userSocketID).emit("player-joined", { users: cars });
             console.log(`Player ID: ${user.userID}/${user.userSocketID}, received`);
         }   
+        console.log("JoinRoom st4")
     });
     socket.on("move", async (roomID, userID, vehicleInfo) => {
         const answer = await utilService.checkBody(vehicleInfo, ['left', 'top', 
-            'rotateAngle', 'wheelRotateAngle']);
+            'angle', 'wheelAngle']);
         const isBodyOk = !answer.isHasProblems && !!+roomID && !!+userID;
-        console.log(roomID, userID, `roomID, userID`);
+        console.log(roomID, userID, `roomID, userID. Move!`);
         
         if(!isBodyOk){
             await io.to(socket.id).emit("wrong-body");

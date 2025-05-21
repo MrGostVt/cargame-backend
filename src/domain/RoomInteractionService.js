@@ -8,7 +8,14 @@ const roomInteractionService = {
     },
     async CreateRoom(userID, userVehicleInfo){
         const roomID = parseInt(1000 + Math.random() * 8999);
+        // const roomID = 3866;
+        const isExist = !!(await collectionController.GetRoomInfo(roomID));
+        if(isExist){
+            return null;
+        }
+
         const room = await collectionController.CreateRoom(roomID, userID, userVehicleInfo);
+        room.users = [];
         //TODO: Remove socketID from room for prev layer 
         return room;
     },
@@ -34,14 +41,16 @@ const roomInteractionService = {
         }
         
         const result = await collectionController.JoinRoom(roomID, userID, userVehicleInfo);
+        
         if(!result){
             return null;
         }
+        const users = result.users.map((val) => {
+            return {userID: val.userID, userVehicleInfo: val.userVehicleInfo};
+        })
+        result.users = users;
 
         return result;
-    },
-    async UpdateRoomInfo(roomID, userID, userVehicleInfo){
-        await collectionController.UpdateRoomInfo(roomID, userID, userVehicleInfo);
     },
     async GetAllRooms(){
         const collection = await collectionController.GetAllRooms();
