@@ -1,5 +1,5 @@
-
-const Collection = [{users:[{userID: 964, userSocketID: null, userVehicleInfo: {}}], identifier:8960}];
+//{users:[{userID: 964, userSocketID: null, userVehicleInfo: {}}], identifier:8960}
+const Collection = [];
 
 const collectionController = {
     async CreateRoom(roomID, userID, userVehicleInfo){
